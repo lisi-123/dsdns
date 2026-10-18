@@ -29,7 +29,7 @@ wget -O ip2region_v6.xdb https://raw.githubusercontent.com/lionsoul2014/ip2regio
 ### 编译
 ```bash
 # 克隆仓库
-git clone https://github.com/5p2O5pav/dsdns.git
+git clone https://github.com/lisi-123/dsdns.git
 cd dsdns
 
 # 下载依赖
