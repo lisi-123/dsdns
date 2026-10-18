@@ -87,10 +87,10 @@ func (s *Server) handleDNS(w dns.ResponseWriter, r *dns.Msg) {
 		return
 	}
 
-	best := matchRecord(records, geoInfo)
+	best := matchRecord(records, geoInfo, q.Qtype)
 	if best == nil {
 		logger.Warn("no matching record", "domain", domain)
-		m.SetRcode(r, dns.RcodeNameError)
+		m.SetRcode(r, dns.RcodeSuccess)
 		w.WriteMsg(m)
 		return
 	}
@@ -113,18 +113,37 @@ func (s *Server) handleDNS(w dns.ResponseWriter, r *dns.Msg) {
 // 3. 中国其他 (china_other)
 // 4. 大洲匹配
 // 5. 默认
-func matchRecord(records []*models.Record, geo *geo.GeoInfo) *models.Record {
+func matchRecord(records []*models.Record, geoInfo *geo.GeoInfo, qtype uint16) *models.Record {
 	var best *models.Record
 	bestScore := -1
 
 	for _, rec := range records {
-		score := matchScore(rec, geo)
+		// 先过滤与查询类型不兼容的记录
+		if !recordMatchesQtype(rec, qtype) {
+			continue
+		}
+
+		score := matchScore(rec, geoInfo)
 		if score > bestScore {
 			bestScore = score
 			best = rec
 		}
 	}
+
 	return best
+}
+
+func recordMatchesQtype(rec *models.Record, qtype uint16) bool {
+	switch qtype {
+	case dns.TypeA:
+		return rec.Type == models.TypeA || rec.Type == models.TypeCNAME
+	case dns.TypeAAAA:
+		return rec.Type == models.TypeAAAA || rec.Type == models.TypeCNAME
+	case dns.TypeCNAME:
+		return rec.Type == models.TypeCNAME
+	default:
+		return false
+	}
 }
 
 func matchScore(rec *models.Record, geo *geo.GeoInfo) int {
