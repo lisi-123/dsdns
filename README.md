@@ -149,12 +149,6 @@ cache:
 5. **内存缓存**：`geo_ttl_sec` 控制 IP 归属结果在内存中的缓存时间，不宜设得过大，避免 IP 归属变更后延迟生效。
 6. **前端更新**：如需修改前端，直接编辑 `internal/web/static` 下的文件，重新编译即可。
 
-## 构建最小二进制（可选）
-项目已使用 `modernc.org/sqlite` 纯 Go 驱动，无 CGO 依赖，编译出的二进制仅约 15~20MB。  
-可以通过 `upx` 进一步压缩：
-```bash
-upx --best dsdns
-```
 
 ## 许可证
 MIT License
